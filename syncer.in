@@ -1,0 +1,22 @@
+#!/bin/sh
+
+set -eu
+
+%%<service.sh%%
+
+name="syncer"
+
+load_rc %%:RCPATH%%/syncerrc
+
+: ${syncer_program="./syncerd"}
+: ${syncer_config="syncer.conf"}
+: ${syncer_pidfile="syncerd.pid"}
+: ${syncer_flags="-f ${syncer_config} -p ${syncer_pidfile}"}
+
+command_debug()
+{
+	syncer_flags="-f ${syncer_config} -p ${syncer_pidfile} -D"
+	command_start
+}
+
+run_command $@

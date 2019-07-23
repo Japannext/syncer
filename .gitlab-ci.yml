@@ -5,7 +5,7 @@ stages:
 'pylint':
     stage: lint
     before_script:
-        - yum install -y pylint
+        - yum install -y pylint python-inotify
     script:
         - for file in *.py ; do pylint $file ; done
     tags:

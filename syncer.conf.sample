@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>PidFile</key>
+    <string>./syncerd.pid</string>
+    <key>WatchDirectory</key>
+    <array>
+        <string>./*put</string>
+        <string>./output</string>
+    </array>
+    <key>SFTP</key>
+    <dict>
+        <key>Hosts</key>
+        <array>
+            <string>host01</string>
+            <string>host02</string>
+        </array>
+        <key>user</key>
+        <string>username</string>
+    </dict>
+</dict>
+</plist>
