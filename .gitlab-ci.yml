@@ -1,0 +1,12 @@
+---
+stages:
+    - lint
+
+'pylint':
+    stage: lint
+    before_script:
+        - yum install -y pylint
+    script:
+        - for file in *.py ; do pylint $file ; done
+    tags:
+        - pylint
