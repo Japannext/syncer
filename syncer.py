@@ -21,8 +21,7 @@ class WatchFiles(Thread):
         self.doexit = Event()
         w_man = pyinotify.WatchManager()
         mask = pyinotify.IN_CLOSE_WRITE
-        sftp = self.plist['SFTP']
-        self.notifier = pyinotify.Notifier(w_man, RsyncInFiles(sftp['Hosts'], sftp['user']))
+        self.notifier = pyinotify.Notifier(w_man, RsyncInFiles(self.plist['SFTP']))
         for watchdirectory in self.plist['WatchDirectory']:
             w_man.add_watch(watchdirectory, mask, do_glob=True)
 
@@ -44,9 +43,10 @@ class WatchFiles(Thread):
                 break
 
 class RsyncInFiles(pyinotify.ProcessEvent):
-    def __init__(self, sftphosts, user=''):
-        self.sftphosts = sftphosts
-        self.user = user
+    def __init__(self, sftp_options):
+        self.sftphosts = sftp_options['Hosts']
+        self.user = sftp_options['user']
+        self.rsync_options = sftp_options['rsync_options']
         pyinotify.ProcessEvent.__init__(self)
 
     def process_IN_CLOSE_WRITE(self, event):
@@ -56,7 +56,7 @@ class RsyncInFiles(pyinotify.ProcessEvent):
         for sftp in self.sftphosts:
             if sftp in (my_hostname, my_hostname.split('.')[0]):
                 continue
-            cmd = shlex.split("rsync -v %s %s" % (new_file, self.get_dest_string(sftp, new_file)))
+            cmd = shlex.split("rsync %s %s %s" % (self.rsync_options, new_file, self.get_dest_string(sftp, new_file)))
             rsync = subprocess.Popen(cmd)
             while rsync.poll() is None:
                 time.sleep(1)
