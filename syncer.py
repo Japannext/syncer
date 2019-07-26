@@ -21,10 +21,9 @@ class WatchFiles(Thread):
         self.doexit = Event()
         w_man = pyinotify.WatchManager()
         mask = pyinotify.IN_CLOSE_WRITE
-        sftp = self.plist['SFTP']
-        self.notifier = pyinotify.Notifier(w_man, RsyncInFiles(sftp['Hosts'], sftp['user']))
+        self.notifier = pyinotify.Notifier(w_man, RsyncInFiles(self.plist['SFTP']))
         for watchdirectory in self.plist['WatchDirectory']:
-            w_man.add_watch(watchdirectory, mask, do_glob=True)
+            w_man.add_watch(watchdirectory, mask, do_glob=True, rec=True, auto_add=True)
 
     def stop(self):
         self.doexit.set()
@@ -44,26 +43,29 @@ class WatchFiles(Thread):
                 break
 
 class RsyncInFiles(pyinotify.ProcessEvent):
-    def __init__(self, sftphosts, user=''):
-        self.sftphosts = sftphosts
-        self.user = user
+    def __init__(self, sftp_options):
+        self.sftphosts = sftp_options['Hosts']
+        self.user = sftp_options['user']
+        self.rsync_options = sftp_options['rsync_options']
         pyinotify.ProcessEvent.__init__(self)
 
     def process_IN_CLOSE_WRITE(self, event):
+        if event.name.startswith('.'):
+            return
         new_file = event.pathname
         WatchFiles.jnxlog.info("New file %s is detected in %s", event.name, event.path)
         my_hostname = socket.gethostname()
         for sftp in self.sftphosts:
             if sftp in (my_hostname, my_hostname.split('.')[0]):
                 continue
-            cmd = shlex.split("rsync -v %s %s" % (new_file, self.get_dest_string(sftp, new_file)))
+            cmd = shlex.split("rsync %s %s %s" % (self.rsync_options, new_file, self.get_dest_string(sftp, new_file)))
             rsync = subprocess.Popen(cmd)
             while rsync.poll() is None:
                 time.sleep(1)
             if rsync.returncode == 0:
                 WatchFiles.jnxlog.info("Successfully rsynced %s into %s host", new_file, sftp)
             else:
-                WatchFiles.jnxlog.critical("Could not rsync %s", sftp)
+                WatchFiles.jnxlog.warning("Could not rsync %s into %s host", new_file, sftp)
 
     def get_dest_string(self, host, filename):
         prefix = ''

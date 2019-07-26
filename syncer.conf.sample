@@ -18,6 +18,8 @@
         </array>
         <key>user</key>
         <string>username</string>
+        <key>rsync_options</key>
+        <string>-av</string>
     </dict>
 </dict>
 </plist>
