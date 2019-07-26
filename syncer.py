@@ -63,7 +63,7 @@ class RsyncInFiles(pyinotify.ProcessEvent):
             if rsync.returncode == 0:
                 WatchFiles.jnxlog.info("Successfully rsynced %s into %s host", new_file, sftp)
             else:
-                WatchFiles.jnxlog.critical("Could not rsync %s", sftp)
+                WatchFiles.jnxlog.warning("Could not rsync %s into %s host", new_file, sftp)
 
     def get_dest_string(self, host, filename):
         prefix = ''
