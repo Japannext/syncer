@@ -23,7 +23,7 @@ class WatchFiles(Thread):
         mask = pyinotify.IN_CLOSE_WRITE
         self.notifier = pyinotify.Notifier(w_man, RsyncInFiles(self.plist['SFTP']))
         for watchdirectory in self.plist['WatchDirectory']:
-            w_man.add_watch(watchdirectory, mask, do_glob=True, rec=True)
+            w_man.add_watch(watchdirectory, mask, do_glob=True, rec=True, auto_add=True)
 
     def stop(self):
         self.doexit.set()
