@@ -50,6 +50,8 @@ class RsyncInFiles(pyinotify.ProcessEvent):
         pyinotify.ProcessEvent.__init__(self)
 
     def process_IN_CLOSE_WRITE(self, event):
+        if event.name.startswith('.'):
+            return
         new_file = event.pathname
         WatchFiles.jnxlog.info("New file %s is detected in %s", event.name, event.path)
         my_hostname = socket.gethostname()
