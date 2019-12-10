@@ -59,13 +59,14 @@ class RsyncInFiles(pyinotify.ProcessEvent):
             if sftp in (my_hostname, my_hostname.split('.')[0]):
                 continue
             cmd = shlex.split("rsync %s %s %s" % (self.rsync_options, new_file, self.get_dest_string(sftp, new_file)))
-            rsync = subprocess.Popen(cmd)
+            rsync = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+            err = rsync.communicate()[1]
             while rsync.poll() is None:
                 time.sleep(1)
             if rsync.returncode == 0:
                 WatchFiles.jnxlog.info("Successfully rsynced %s into %s host", new_file, sftp)
             else:
-                WatchFiles.jnxlog.error("Could not rsync %s into %s host", new_file, sftp)
+                WatchFiles.jnxlog.error("Could not rsync %s into %s host\n%s", new_file, sftp, err)
 
     def get_dest_string(self, host, filename):
         prefix = ''
