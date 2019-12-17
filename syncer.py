@@ -59,7 +59,7 @@ class RsyncInFiles(pyinotify.ProcessEvent):
             if sftp in (my_hostname, my_hostname.split('.')[0]):
                 continue
             cmd = shlex.split("rsync %s %s %s" % (self.rsync_options, new_file, self.get_dest_string(sftp, new_file)))
-            rsync = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+            rsync = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             err = rsync.communicate()[1]
             while rsync.poll() is None:
                 time.sleep(1)
