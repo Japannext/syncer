@@ -1,3 +1,4 @@
+import os
 import shlex
 import subprocess
 import time
@@ -20,7 +21,7 @@ class WatchFiles(Thread):
         Thread.__init__(self)
         self.doexit = Event()
         w_man = pyinotify.WatchManager()
-        mask = pyinotify.IN_CLOSE_WRITE
+        mask = pyinotify.IN_CLOSE_WRITE | pyinotify.IN_MOVED_TO
         self.notifier = pyinotify.Notifier(w_man, RsyncInFiles(self.plist['SFTP']))
         for watchdirectory in self.plist['WatchDirectory']:
             w_man.add_watch(watchdirectory, mask, do_glob=True, rec=True, auto_add=True)
@@ -49,10 +50,19 @@ class RsyncInFiles(pyinotify.ProcessEvent):
         self.rsync_options = sftp_options['rsync_options']
         pyinotify.ProcessEvent.__init__(self)
 
+    def process_IN_MOVED_TO(self, event):
+        self.rsync_file(event)
+
     def process_IN_CLOSE_WRITE(self, event):
+        self.rsync_file(event)
+
+    def rsync_file(self, event):
         if event.name.startswith('.'):
             return
         new_file = event.pathname
+        time.sleep(1)
+        if not os.path.exists(new_file):
+            return
         WatchFiles.jnxlog.info("New file %s is detected in %s", event.name, event.path)
         my_hostname = socket.gethostname()
         for sftp in self.sftphosts:
