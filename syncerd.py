@@ -62,7 +62,7 @@ def main():
     try:
         pidfile.open(0644)
     except daemon.DaemonAlreadyRunning as exc:
-        WatchFiles.jnxlog.warning("Daemon already running, pid: %d", exc.otherpid)
+        WatchFiles.jnxlog.error("Daemon already running, pid: %d", exc.otherpid)
         sys.exit(1)
     except Exception:
         WatchFiles.jnxlog.critical("Can not open or create pidfile")
@@ -75,7 +75,7 @@ def main():
         dump = WatchFiles()
         dump.start()
     except Exception as exc:
-        WatchFiles.jnxlog.warning("Aborting..., %s", exc)
+        WatchFiles.jnxlog.error("Aborting..., %s", exc)
         traceback.print_exc()
         sys.exit(1)
 
