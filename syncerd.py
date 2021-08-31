@@ -1,4 +1,7 @@
 #!/usr/bin/python
+#
+# Copyright 2021 Japannext Co., Ltd. <https://www.japannext.co.jp/>
+# SPDX-License-Identifier: GPL-2.0-or-later
 
 from __future__ import print_function
 import signal
